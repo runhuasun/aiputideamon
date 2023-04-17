@@ -15,15 +15,16 @@ def start_process(config_path):
 
         # 执行任务的逻辑
         conn = psycopg2.connect(database="neondb", user="runhuasun", password="isG02XlZAxUL", host="ep-shy-frog-644279.us-east-2.aws.neon.tech", port="5432")
-        
+
         cur = conn.cursor()
         cur.execute("SELECT * FROM Model")
         rows = cur.fetchall()
-        
+
         for row in rows:
-          print(row)
-     except Exception as e:
-       log.error("进程发生错误", str(e))
+            print(row)
+        
+    except Exception as e:
+        log.error("进程发生错误", str(e))
 
 
 # 主进程
