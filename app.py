@@ -7,15 +7,22 @@ from common import log, const
 from multiprocessing import Pool
 
 
-# 启动通道
+# 训练LoRA
 def start_process(config_path):
     try:
         # 若为多进程启动,子进程无法直接访问主进程的内存空间,重新创建config类
         config.load_config(config_path)
 
         # 执行任务的逻辑
+        conn = psycopg2.connect(database="neondb", user="runhuasun", password="isG02XlZAxUL", host="ep-shy-frog-644279.us-east-2.aws.neon.tech", port="5432")
         
-    except Exception as e:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Model")
+        rows = cur.fetchall()
+        
+        for row in rows:
+          print(row)
+          
         log.error("进程发生错误", str(e))
 
 
@@ -27,13 +34,10 @@ def main():
 
 
         # 使用进程池启动其他通道子进程
-        pool = Pool(len(channel_type))
-        for type_item in channel_type:
-            log.info("[INIT] Start up: {} on {}", model_type, type_item)
-            pool.apply_async(start_process, args=[type_item, args.config])
+        pool = Pool(1)
 
-        if terminal:
-            start_process(terminal, args.config)
+        # 启动脱机处理生成LORA模型的进程
+        pool.apply_async(trainLoRA_process, args=[args.config])
 
         # 等待池中所有进程执行完毕
         pool.close()
