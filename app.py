@@ -3,7 +3,7 @@
 import argparse
 import config
 import psycopg2
-from common import log, const
+from common import log
 from multiprocessing import Pool
 
 
