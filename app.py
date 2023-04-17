@@ -22,16 +22,15 @@ def start_process(config_path):
         
         for row in rows:
           print(row)
-          
-        log.error("进程发生错误", str(e))
+     except Exception as e:
+       log.error("进程发生错误", str(e))
 
 
+# 主进程
 def main():
     try:
         # load config
         config.load_config(args.config)
-
-
 
         # 使用进程池启动其他通道子进程
         pool = Pool(1)
