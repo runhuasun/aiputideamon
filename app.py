@@ -74,7 +74,7 @@ def updateLoRA_process(config_path):
         # 
         for row in rows:
             print(row[0])
-            time.sleep(1)
+            time.sleep(2)
 
         conn.close()
 
