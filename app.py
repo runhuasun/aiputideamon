@@ -26,7 +26,7 @@ def trainLoRA_process(config_path):
         conn.close()
 
     except Exception as e:
-        log.error("进程发生错误", str(e))
+        log.error(str(e))
 
 
 # 主进程
