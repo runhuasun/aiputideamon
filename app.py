@@ -8,7 +8,7 @@ from multiprocessing import Pool
 
 
 # 训练LoRA
-def start_process(config_path):
+def trainLoRA_process(config_path):
     try:
         # 若为多进程启动,子进程无法直接访问主进程的内存空间,重新创建config类
         config.load_config(config_path)
