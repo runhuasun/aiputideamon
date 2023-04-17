@@ -17,7 +17,7 @@ def trainLoRA_process(config_path):
         conn = psycopg2.connect(database="neondb", user="runhuasun", password="isG02XlZAxUL", host="ep-shy-frog-644279.us-east-2.aws.neon.tech", port="5432")
 
         cur = conn.cursor()
-        cur.execute("SELECT * FROM Model")
+        cur.execute("SELECT * FROM User")
         rows = cur.fetchall()
 
         for row in rows:
