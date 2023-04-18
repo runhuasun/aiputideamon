@@ -4,6 +4,8 @@ import argparse
 import config
 import psycopg2
 import time
+import replicate
+
 from common import log
 from multiprocessing import Pool
 
@@ -18,28 +20,35 @@ def trainLoRA_process(config_path):
         config.load_config(config_path)
         conn = getDBCon(config)
         
-        # 执行任务的逻辑
+        while true:
+            
+            cur = conn.cursor()
+    
+            # 循环查询所有状态为CREATE的模型
+            cur.execute('SELECT "id", "trainSrv", "trainData" FROM "Model" WHERE "status" = ' + "'CREATE'")
 
-
-        # 循环查询所有状态为CREATE的模型
+            rows = cur.fetchall()
         
-            # 把模型的状态置为START
+            for row in rows:
+                # 把模型的状态置为START
+                cur.execute('UPDATE "Model" set "status" = ' + "'START'" + ' WHERE "id" = ' + row[0])
+                conn.commit()
+
+                # 调用模型生成服务
+                output = replicate.run(row[1],
+                                input={"instance_data": open(row[2], "rb")}   )
+
+                # 如果模型生成服务返回错误，就把模型状态标记回ERROR，并把模型返回的错误记录到MSG字段
             
-            # 调用模型生成服务
+            # 等待10秒钟，继续下一次轮询
+            time.sleep(1)
+
             
-            # 如果模型生成服务返回错误，就把模型状态标记回ERROR，并把模型返回的错误记录到MSG字段
-            
-        # 等待10秒钟，继续下一次轮询
-            
-            
-        cur = conn.cursor()
-        cur.execute('SELECT "id" FROM "Room"')
-        rows = cur.fetchall()
+
 
         # 
-        for row in rows:
+
             print(row[0])
-            time.sleep(1)
 
         conn.close()
 
@@ -96,8 +105,16 @@ def main():
 
         # 启动脱机处理生成LORA模型的进程
         pool.apply_async(trainLoRA_process, args=[args.config])
+        # 启动轮询更新LORA模型状态的进程
         pool.apply_async(updateLoRA_process, args=[args.config])
+        
+        # 启动脱机处理AI调用的进程
+        
+        # 启动更新AI调用状态的进程
+        
+        # 启动转存照片的进程        
 
+        
         # 等待池中所有进程执行完毕
         pool.close()
         pool.join()
